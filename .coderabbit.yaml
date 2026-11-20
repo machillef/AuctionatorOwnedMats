@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+reviews:
+  profile: assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
+  path_instructions:
+    - path: "**/*.lua"
+      instructions: |
+        This is a World of Warcraft: Forever (1.60.1 / Interface 16001) Lua 5.1 addon
+        that extends Auctionator.
+        - Standard WoW client globals (CreateFrame, hooksecurefunc, C_TradeSkillUI,
+          C_Item, C_Timer, Enum, ProfessionsFrame, AuctionHouseFrame, AuctionFrame,
+          GameTooltip, UIParent, UISpecialFrames, SlashCmdList, GetMoneyString,
+          ContinuableContainer, Item, GREEN_FONT_COLOR, WHITE_FONT_COLOR,
+          RED_FONT_COLOR, tIndexOf, date, etc.) and Auctionator globals
+          (Auctionator, AuctionatorCraftingInfoProfessionsFrame) are provided by the
+          WoW runtime and the Auctionator dependency. Do not flag them as undefined.
+        - Focus on real Lua 5.1 bugs, nil-safety, UI taint/frame anchoring issues,
+          memory/event leaks, Auctionator API edge cases, and math accuracy.
+chat:
+  auto_reply: true
