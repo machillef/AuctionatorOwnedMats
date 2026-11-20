@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Auctionator: Owned Mats
+## Notes: Shows missing reagent cost, cash profit, and a sortable Best Crafts scanner using materials in your bags and Auctionator prices.
+## Author: Custom Companion
+## Version: 1.1.0
+## Dependencies: Auctionator
+## SavedVariables: AuctionatorOwnedMatsDB
+
+Core.lua
+Scanner.lua
