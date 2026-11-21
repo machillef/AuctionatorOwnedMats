@@ -531,7 +531,8 @@ local function InitializeProfessionsUI()
   bestCraftsButton:SetSize(96, 20)
   bestCraftsButton:SetText("Best Crafts")
   bestCraftsButton:SetPoint("TOPRIGHT", ProfessionsFrame, "TOPRIGHT", -32, -3)
-  bestCraftsButton:SetFrameLevel(ProfessionsFrame:GetFrameLevel() + 20)
+  -- DIALOG strata: UI skins draw their title bars above a plain child button and hide it
+  bestCraftsButton:SetFrameStrata("DIALOG")
   bestCraftsButton:SetScript("OnClick", function()
     if ns.ToggleScannerWindow then
       ns.ToggleScannerWindow()
@@ -545,6 +546,11 @@ local function InitializeProfessionsUI()
   end)
   bestCraftsButton:SetScript("OnLeave", function()
     GameTooltip:Hide()
+  end)
+
+  ProfessionsFrame:HookScript("OnShow", function()
+    bestCraftsButton:SetAlpha(1)
+    bestCraftsButton:Show()
   end)
 
   ProfessionsFrame:HookScript("OnHide", function()
