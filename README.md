@@ -17,12 +17,20 @@ A lightweight companion addon for **Auctionator** on **WoW: Forever (`1.60.1` / 
 
 ## Installation
 
-1. Ensure **Auctionator** is installed and enabled.
-2. Copy the `AuctionatorOwnedMats` folder into:
-   ```text
-   World of Warcraft\_forever_\Interface\AddOns\AuctionatorOwnedMats
-   ```
-3. Launch (or restart) WoW and enable **Auctionator: Owned Mats** in the AddOns list.
+Requires **Auctionator**.
+
+- **CurseForge app:** search for *Auctionator: Owned Mats* (WoW: Forever). Auctionator is installed with it.
+- **Manual:** download the zip from [GitHub Releases](https://github.com/machillef/AuctionatorOwnedMats/releases) and extract it into `World of Warcraft\_forever_\Interface\AddOns\`, so you get `AddOns\AuctionatorOwnedMats\AuctionatorOwnedMats.toc`.
+
+Launch (or restart) WoW and enable **Auctionator: Owned Mats** in the AddOns list.
+
+## Releasing
+
+Releases are built by [BigWigsMods/packager](https://github.com/BigWigsMods/packager) when a `v*` tag is pushed: `v1.3.0` is a release, `v1.3.0-beta.1` a beta, `v1.3.0-alpha.1` an alpha. The tag sets the version (`@project-version@` in the TOC); `CHANGELOG.md` is the changelog. The CurseForge page text lives in `docs/store-description.md` and is pasted into the CurseForge web UI by hand.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
 
 ## Slash Commands
 

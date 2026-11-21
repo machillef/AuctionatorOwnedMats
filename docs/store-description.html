@@ -1,0 +1,41 @@
+<h1>Auctionator: Owned Mats</h1>
+<p>A companion addon for <a href="https://www.curseforge.com/wow/addons/auctionator">Auctionator</a> on <strong>WoW: Forever</strong>.</p>
+<p>Auctionator normally calculates crafting costs as if you have to buy every reagent from scratch. <strong>Auctionator: Owned Mats</strong> also counts what is already in your bags, so you can see how much you still need to spend, what the real profit of a craft is, and which recipes make the most gold from the materials you already own.</p>
+<p><strong>Requires: Auctionator</strong></p>
+<h2>Features</h2>
+<h3>Bag-aware cost and profit in the Professions window</h3>
+<p>Right below Auctionator's <em>To Craft</em> and <em>Profit</em> lines, the addon adds two more lines:</p>
+<ul>
+<li><strong>Price of missing mats</strong>: the cost of only the reagents you do not already have in your bags. It turns green when you have everything on hand, and amber when you are still missing something.</li>
+<li><strong>Cash Profit</strong>: your profit after the 5% Auction House cut, counting only the gold you still have to spend. Green when positive, red when negative.</li>
+</ul>
+<h3>Best Crafts window</h3>
+<p>Click the <strong>Best Crafts</strong> button in the Professions window, or type <code>/aom list</code>, to get an overview of your current profession:</p>
+<ul>
+<li>Checks all of your learned recipes for the open profession against your bags and Auctionator prices.</li>
+<li>Filter the list with <strong>Have Mats</strong>, <strong>Ready Only</strong>, <strong>All Recipes</strong>, and <strong>True Profit &gt; 0 only</strong>.</li>
+<li>Sort by <strong>Recipe</strong>, <strong>Missing Mats</strong>, <strong>Cash Profit</strong>, or <strong>True Profit</strong>.</li>
+<li>Tooltips show the reagent breakdown and how old each Auction House price is.</li>
+<li>Click a row to jump straight to that recipe in the Professions window.</li>
+<li>While the Auction House is open, click <strong>Scan AH</strong> to run a live Auctionator search for the listed recipes and reagents, updating profits as results come in.</li>
+</ul>
+<h3>Not Learned tab</h3>
+<p>Before buying a new recipe, check the <strong>Not Learned</strong> tab to see what you have not learned yet for the open profession and decide whether it is worth picking up:</p>
+<ul>
+<li><strong>Recipe Cost</strong>: the Auction House or vendor price of the recipe item.</li>
+<li><strong>Profit/Craft</strong>: the profit from one craft if you buy all the materials.</li>
+<li><strong>Payback</strong>: how many crafts it takes to earn back the price of the recipe.</li>
+</ul>
+<h2>Slash commands</h2>
+<ul>
+<li><code>/aom list</code> (also <code>/aom scan</code>, <code>/aom best</code>): show or hide the Best Crafts window.</li>
+<li><code>/aom toggle</code>, <code>/aom on</code>, <code>/aom off</code>: show or hide the extra lines in the Professions window.</li>
+<li><code>/aom debug</code>: print a reagent-by-reagent cost and bag breakdown for the selected recipe.</li>
+</ul>
+<h2>Notes</h2>
+<ul>
+<li>Prices come from Auctionator, so scan the Auction House with Auctionator (or use <strong>Scan AH</strong>) to keep them up to date.</li>
+<li>Recipe items are matched by their English names, so the Not Learned tab works best on English clients.</li>
+</ul>
+<h2>Feedback</h2>
+<p>If you run into a bug or have a feature request, let me know on <a href="https://github.com/machillef/AuctionatorOwnedMats/issues">GitHub Issues</a>.</p>
