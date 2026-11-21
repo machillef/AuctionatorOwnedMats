@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0" stop-color="#2b3a67"/><stop offset="1" stop-color="#0e1424"/>
+    </radialGradient>
+    <linearGradient id="bag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a8703f"/><stop offset="1" stop-color="#5c3517"/>
+    </linearGradient>
+    <radialGradient id="coin" cx="40%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#fff2a8"/><stop offset=".55" stop-color="#f2c230"/><stop offset="1" stop-color="#a87412"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="72" fill="url(#bg)"/>
+  <rect x="14" y="14" width="484" height="484" rx="62" fill="none" stroke="#c9a24a" stroke-width="6" opacity=".8"/>
+  <!-- bag -->
+  <path d="M186 168 C150 210 112 268 112 336 C112 404 168 436 236 436 C304 436 352 404 352 336 C352 268 314 210 278 168 Z" fill="url(#bag)" stroke="#2e1a0a" stroke-width="8"/>
+  <path d="M176 150 Q232 118 288 150 L278 176 Q232 156 186 176 Z" fill="#7a4a22" stroke="#2e1a0a" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M182 180 Q232 196 282 180" fill="none" stroke="#d9b04a" stroke-width="10" stroke-linecap="round"/>
+  <!-- herb leaf -->
+  <path d="M240 150 C220 100 236 70 268 58 C276 96 266 128 240 150 Z" fill="#5fbf5a" stroke="#1d4a1d" stroke-width="6"/>
+  <path d="M244 146 Q252 108 264 70" fill="none" stroke="#1d4a1d" stroke-width="4"/>
+  <!-- ore crystal -->
+  <path d="M196 156 L176 118 L196 92 L216 120 Z" fill="#7fd0ff" stroke="#16405c" stroke-width="6" stroke-linejoin="round"/>
+  <!-- coin stack -->
+  <g stroke="#6b4708" stroke-width="6">
+    <ellipse cx="372" cy="412" rx="76" ry="24" fill="#c8901c"/>
+    <rect x="296" y="380" width="152" height="32" fill="#d9a325" stroke="none"/>
+    <ellipse cx="372" cy="380" rx="76" ry="24" fill="#e2b32c"/>
+    <rect x="296" y="350" width="152" height="30" fill="#d9a325" stroke="none"/>
+    <ellipse cx="372" cy="350" rx="76" ry="24" fill="#ebbd30"/>
+  </g>
+  <circle cx="380" cy="268" r="70" fill="url(#coin)" stroke="#6b4708" stroke-width="8"/>
+  <circle cx="380" cy="268" r="50" fill="none" stroke="#a87412" stroke-width="6"/>
+  <text x="380" y="292" text-anchor="middle" font-family="Georgia, serif" font-size="70" font-weight="bold" fill="#7a520a">g</text>
+</svg>

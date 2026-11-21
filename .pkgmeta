@@ -1,0 +1,15 @@
+package-as: AuctionatorOwnedMats
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+required-dependencies:
+  - auctionator
+
+ignore:
+  - docs
+  - .github
+  - .coderabbit.yaml
+  - .gitignore
+  - .pkgmeta
