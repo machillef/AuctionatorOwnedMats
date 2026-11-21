@@ -19,7 +19,10 @@ function ns.GetDB()
     AuctionatorOwnedMatsDB.enabled = true
   end
   if AuctionatorOwnedMatsDB.filterMode == nil then
-    AuctionatorOwnedMatsDB.filterMode = "have" -- "have", "ready", "all"
+    AuctionatorOwnedMatsDB.filterMode = "have" -- "have", "ready", "all", "unlearned"
+  end
+  if type(AuctionatorOwnedMatsDB.recipeItems) ~= "table" then
+    AuctionatorOwnedMatsDB.recipeItems = {} -- recipeID -> itemID of the item that teaches it
   end
   if AuctionatorOwnedMatsDB.onlyTrueProfit == nil then
     AuctionatorOwnedMatsDB.onlyTrueProfit = false
@@ -486,7 +489,7 @@ local function HookAuctionatorFrameIfPresent()
 end
 
 local refreshPending = false
-local function RefreshAll()
+function ns.RefreshAll()
   ns.UpdateDisplay()
   if ns.RefreshScannerIfShown then
     if not refreshPending then
@@ -509,7 +512,7 @@ local function InitializeProfessionsUI()
   HookAuctionatorFrameIfPresent()
 
   if initialized then
-    RefreshAll()
+    ns.RefreshAll()
     return
   end
   initialized = true
@@ -578,10 +581,10 @@ local function InitializeProfessionsUI()
   end
 
   if Auctionator and Auctionator.API and Auctionator.API.v1 and Auctionator.API.v1.RegisterForDBUpdate then
-    Auctionator.API.v1.RegisterForDBUpdate(CALLER_ID, RefreshAll)
+    Auctionator.API.v1.RegisterForDBUpdate(CALLER_ID, ns.RefreshAll)
   end
 
-  RefreshAll()
+  ns.RefreshAll()
 end
 
 local eventFrame = CreateFrame("Frame")
@@ -607,11 +610,11 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
     InitializeProfessionsUI()
     C_Timer.After(0, function()
       HookAuctionatorFrameIfPresent()
-      RefreshAll()
+      ns.RefreshAll()
     end)
   elseif event == "BAG_UPDATE_DELAYED" then
     if initialized and ProfessionsFrame and ProfessionsFrame:IsVisible() then
-      RefreshAll()
+      ns.RefreshAll()
     end
   elseif event == "PLAYER_INTERACTION_MANAGER_FRAME_SHOW" or event == "PLAYER_INTERACTION_MANAGER_FRAME_HIDE" then
     if arg1 == Enum.PlayerInteractionType.Auctioneer and ns.UpdateScannerAHState then

@@ -12,6 +12,7 @@ A lightweight companion addon for **Auctionator** on **WoW: Forever (`1.60.1` / 
   - Filters for `Have Mats`, `Ready Only`, `All Recipes`, and `True Profit > 0 only`.
   - Sortable columns (`Recipe`, `Missing Mats`, `Cash Profit`, `True Profit`) with detailed hover tooltips (including reagent breakdown and AH price age).
   - Click any row to select that recipe directly in the Professions window.
+  - **`Not Learned`** tab: recipes of the open profession you have not learned yet, with `Recipe Cost` (AH or vendor price of the recipe item), `Profit/Craft` (all mats bought) and `Payback` (crafts needed to earn the recipe cost back). The recipe item is found by its English name (`Recipe:`, `Pattern:`, `Plans:` …) in AH results and remembered per character.
   - **`Scan AH`** button (when the Auction House is open) triggers a live `Auctionator.API.v1.MultiSearchExact` scan for the filtered recipes and reagents and updates profits in real time.
 
 ## Installation

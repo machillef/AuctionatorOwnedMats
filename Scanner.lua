@@ -13,7 +13,38 @@ local allEntries = {}
 local filteredEntries = {}
 local scrollOffset = 0
 local liveScanRequestID = 0
-local scanStats = { learned = 0, priced = 0, profName = "Profession", updatedAt = "", statusNote = nil }
+local scanStats = { scanned = 0, priced = 0, profName = "Profession", updatedAt = "", statusNote = nil }
+
+-- English names of the items that teach recipes, per profession ("Pattern: Mooncloth Robe")
+local RECIPE_ITEM_PREFIX = {
+  Alchemy = "Recipe", Cooking = "Recipe", Tailoring = "Pattern", Leatherworking = "Pattern",
+  Blacksmithing = "Plans", Engineering = "Schematic", Enchanting = "Formula",
+  Jewelcrafting = "Design", Inscription = "Technique", ["First Aid"] = "Manual",
+}
+-- "Pattern: Mooncloth Robe" -> recipeID, for every unlearned recipe of the last scan
+local recipeItemNameToID = {}
+
+local function IsUnlearnedMode()
+  return ns.GetDB().filterMode == "unlearned"
+end
+
+local function RecipeItemName(recipeName)
+  return (RECIPE_ITEM_PREFIX[scanStats.profName] or "Recipe") .. ": " .. recipeName
+end
+
+-- itemID of the item that teaches recipeID, from the saved cache or the client's item cache
+local function ResolveRecipeItemID(recipeID, itemName)
+  local db = ns.GetDB()
+  if db.recipeItems[recipeID] then
+    return db.recipeItems[recipeID]
+  end
+  local link = select(2, C_Item.GetItemInfo(itemName))
+  local itemID = link and C_Item.GetItemInfoInstant(link)
+  if itemID then
+    db.recipeItems[recipeID] = itemID
+  end
+  return itemID
+end
 
 local function IsAuctionHouseOpen()
   return (AuctionHouseFrame and AuctionHouseFrame:IsShown())
@@ -55,12 +86,14 @@ local function GetCurrentProfessionName()
   return "Profession"
 end
 
-local function ScanLearnedRecipes()
+local function ScanRecipes()
   allEntries = {}
-  scanStats.learned = 0
+  recipeItemNameToID = {}
+  scanStats.scanned = 0
   scanStats.priced = 0
   scanStats.profName = GetCurrentProfessionName()
   scanStats.updatedAt = date("%H:%M:%S")
+  local wantLearned = not IsUnlearnedMode()
 
   local T = C_TradeSkillUI
   if not (T and T.GetAllRecipeIDs and T.GetRecipeInfo and T.GetRecipeSchematic) then
@@ -74,8 +107,16 @@ local function ScanLearnedRecipes()
 
   for _, recipeID in ipairs(ids) do
     local recipeInfo = T.GetRecipeInfo(recipeID)
-    if type(recipeInfo) == "table" and recipeInfo.learned then
-      scanStats.learned = scanStats.learned + 1
+    if type(recipeInfo) == "table" and (recipeInfo.learned == true) == wantLearned then
+      scanStats.scanned = scanStats.scanned + 1
+
+      local recipeItemName, recipeItemID, recipeCost
+      if not wantLearned and recipeInfo.name then
+        recipeItemName = RecipeItemName(recipeInfo.name)
+        recipeItemNameToID[recipeItemName] = recipeID
+        recipeItemID = ResolveRecipeItemID(recipeID, recipeItemName)
+        recipeCost = recipeItemID and ns.GetUnitPrice(recipeItemID) or 0
+      end
 
       local ok, recipeSchematic = pcall(T.GetRecipeSchematic, recipeID, false)
       if ok and type(recipeSchematic) == "table" and recipeSchematic.reagentSlotSchematics and #recipeSchematic.reagentSlotSchematics > 0 then
@@ -93,7 +134,20 @@ local function ScanLearnedRecipes()
           local hasAnyMat = ownedUnits > 0
           local isReady = (totalUnits > 0 and ownedUnits >= totalUnits and (extraMissingCost or 0) == 0)
 
+          -- Unknown recipe cost / no profit sort last: math.huge
+          if recipeCost == 0 then
+            recipeCost = math.huge
+          end
+          local payback = math.huge
+          if recipeCost and recipeCost ~= math.huge and trueProfit > 0 and not hasUnknownFullPrice then
+            payback = math.ceil(recipeCost / trueProfit)
+          end
+
           table.insert(allEntries, {
+            recipeItemName = recipeItemName,
+            recipeItemID = recipeItemID,
+            recipeCost = recipeCost or math.huge,
+            payback = payback,
             recipeID = recipeID,
             recipeInfo = recipeInfo,
             name = recipeInfo.name or ("Recipe #" .. tostring(recipeID)),
@@ -153,6 +207,10 @@ local function ApplyFilterAndSort()
       end
       return a.name < b.name
     end
+    -- math.huge marks an unknown recipe cost / payback: keep it last in both directions
+    if va == math.huge or vb == math.huge then
+      return vb == math.huge
+    end
     if desc then
       return va > vb
     else
@@ -191,6 +249,23 @@ local function ShowRowTooltip(row, entry)
   GameTooltip:AddDoubleLine("Cash Profit:", ns.FormatSignedMoney(entry.cashProfit, GREEN_FONT_COLOR), 0.4, 0.85, 0.94, 1, 1, 1)
   GameTooltip:AddDoubleLine("True Profit (all mats):", ns.FormatSignedMoney(entry.trueProfit, WHITE_FONT_COLOR), 0.85, 0.85, 0.85, 1, 1, 1)
   GameTooltip:AddDoubleLine("AH Price Age:", FormatPriceAge(entry.age), 0.75, 0.75, 0.75, 1, 1, 1)
+
+  if entry.recipeItemName then
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddLine(entry.recipeItemName, 1, 0.82, 0)
+    if entry.recipeCost == math.huge then
+      GameTooltip:AddLine("Recipe price unknown. Open the Auction House and click 'Scan AH' in this tab to look it up.", 1, 0.65, 0.2, true)
+    else
+      GameTooltip:AddDoubleLine("Recipe Cost (AH/vendor):", ns.FormatMoney(entry.recipeCost), 0.85, 0.85, 0.85, 1, 1, 1)
+      if entry.payback == math.huge and entry.hasUnknownFullPrice then
+        GameTooltip:AddDoubleLine("Payback:", "unknown (unpriced mat)", 0.85, 0.85, 0.85, 1, 0.65, 0.2)
+      elseif entry.payback == math.huge then
+        GameTooltip:AddDoubleLine("Payback:", "never (no profit)", 0.85, 0.85, 0.85, 1, 0.4, 0.3)
+      else
+        GameTooltip:AddDoubleLine("Payback:", string.format("%d crafts", entry.payback), 0.85, 0.85, 0.85, 1, 1, 1)
+      end
+    end
+  end
 
   if entry.breakdown and #entry.breakdown > 0 then
     GameTooltip:AddLine(" ")
@@ -241,9 +316,11 @@ local function UpdateHeaderHighlights()
   end
   local db = ns.GetDB()
   local arrow = db.sortDesc and " (v)" or " (^)"
+  local unlearned = IsUnlearnedMode()
 
   for _, col in ipairs(scannerFrame.headerButtons) do
-    local label = col.baseLabel
+    col.sortKey = unlearned and col.def.ukey or col.def.key
+    local label = unlearned and col.def.ulabel or col.def.label
     if db.sortKey == col.sortKey then
       col.Text:SetText("|cff66d9ef" .. label .. arrow .. "|r")
     else
@@ -308,16 +385,29 @@ local function RenderRows()
       local warn = (entry.hasUnknownMissingPrice or entry.hasUnknownFullPrice) and " |cffffaa00(?)|r" or ""
       row.Name:SetText(entry.name .. badge .. warn)
 
-      if entry.hasUnknownMissingPrice and entry.missingCost == 0 then
+      row.CashProfit:SetText(ns.FormatSignedMoney(entry.cashProfit, GREEN_FONT_COLOR))
+      row.TrueProfit:SetText(ns.FormatSignedMoney(entry.trueProfit, WHITE_FONT_COLOR))
+
+      if entry.recipeItemName then
+        -- Not Learned columns: Recipe Cost | Profit/Craft | Payback
+        if entry.recipeCost == math.huge then
+          row.Missing:SetText("|cff888888Not found|r")
+        else
+          row.Missing:SetText(ns.COST_COLOR .. ns.FormatMoney(entry.recipeCost) .. ns.COLOR_END)
+        end
+        row.CashProfit:SetText(ns.FormatSignedMoney(entry.trueProfit, GREEN_FONT_COLOR))
+        if entry.payback == math.huge then
+          row.TrueProfit:SetText("|cff888888-|r")
+        else
+          row.TrueProfit:SetText(string.format("%d crafts", entry.payback))
+        end
+      elseif entry.hasUnknownMissingPrice and entry.missingCost == 0 then
         row.Missing:SetText(ns.COST_COLOR .. "Unpriced" .. ns.COLOR_END)
       elseif entry.isReady and entry.missingCost == 0 then
         row.Missing:SetText(GREEN_FONT_COLOR:WrapTextInColorCode(ns.FormatMoney(0)))
       else
         row.Missing:SetText(ns.COST_COLOR .. ns.FormatMoney(entry.missingCost) .. ns.COLOR_END)
       end
-
-      row.CashProfit:SetText(ns.FormatSignedMoney(entry.cashProfit, GREEN_FONT_COLOR))
-      row.TrueProfit:SetText(ns.FormatSignedMoney(entry.trueProfit, WHITE_FONT_COLOR))
 
       if (scrollOffset + i) % 2 == 0 then
         row.Bg:SetColorTexture(0.09, 0.10, 0.13, 0.9)
@@ -338,7 +428,9 @@ local function RenderRows()
   end
 
   if total == 0 then
-    if scanStats.priced == 0 then
+    if scanStats.priced == 0 and IsUnlearnedMode() then
+      scannerFrame.emptyText:SetText("No AH prices yet for recipes you have not learned.\nOpen the Auction House and click 'Scan AH'.")
+    elseif scanStats.priced == 0 then
       scannerFrame.emptyText:SetText("No Auctionator prices found for learned recipes.\nRun an Auctionator Scan at the Auction House first.")
     elseif ns.GetDB().filterMode == "have" then
       scannerFrame.emptyText:SetText("No priced recipes match materials currently in your bags.\nClick 'All Recipes' to view every profitable craft.")
@@ -357,8 +449,8 @@ local function RenderRows()
     scannerFrame.footerText:SetText(scanStats.statusNote)
   else
     scannerFrame.footerText:SetText(string.format(
-      "Showing %d recipes (%d priced / %d learned)  |  Updated %s  |  Click a recipe to select",
-      total, scanStats.priced, scanStats.learned, scanStats.updatedAt
+      "Showing %d recipes (%d priced / %d %s)  |  Updated %s  |  Click a recipe to select",
+      total, scanStats.priced, scanStats.scanned, IsUnlearnedMode() and "not learned" or "learned", scanStats.updatedAt
     ))
   end
 
@@ -367,7 +459,7 @@ end
 
 local function FullRescanAndRender()
   scanStats.statusNote = nil
-  ScanLearnedRecipes()
+  ScanRecipes()
   ApplyFilterAndSort()
   RenderRows()
 end
@@ -410,6 +502,8 @@ local function TriggerLiveAHScan()
     return
   end
 
+  local wantLearned = not IsUnlearnedMode()
+  local recipeItemNames = {}
   local seenItemIDs = {}
   local itemsToLoad = {}
   local continuableContainer = ContinuableContainer:Create()
@@ -424,7 +518,10 @@ local function TriggerLiveAHScan()
 
   for _, recipeID in ipairs(ids) do
     local recipeInfo = T.GetRecipeInfo(recipeID)
-    if type(recipeInfo) == "table" and recipeInfo.learned then
+    if type(recipeInfo) == "table" and (recipeInfo.learned == true) == wantLearned then
+      if not wantLearned and recipeInfo.name then
+        table.insert(recipeItemNames, RecipeItemName(recipeInfo.name))
+      end
       local ok, recipeSchematic = pcall(T.GetRecipeSchematic, recipeID, false)
       if ok and type(recipeSchematic) == "table" and recipeSchematic.reagentSlotSchematics and #recipeSchematic.reagentSlotSchematics > 0 then
         local _, _, _, ownedUnits, totalUnits = ns.CalculateCosts(recipeSchematic, nil)
@@ -493,6 +590,13 @@ local function TriggerLiveAHScan()
       end
     end
 
+    for _, name in ipairs(recipeItemNames) do
+      if not seenNames[name] then
+        seenNames[name] = true
+        table.insert(searchNames, name)
+      end
+    end
+
     if #searchNames == 0 then
       FullRescanAndRender()
       return
@@ -518,11 +622,13 @@ local function CreateFilterButton(parent, label, mode, width)
   btn.Text:SetText(label)
   btn:SetScript("OnClick", function()
     local db = ns.GetDB()
+    if (mode == "unlearned") ~= (db.filterMode == "unlearned") then
+      db.sortKey = (mode == "unlearned") and "payback" or "cashProfit"
+      db.sortDesc = (mode ~= "unlearned")
+    end
     db.filterMode = mode
     scrollOffset = 0
-    scanStats.statusNote = nil
-    ApplyFilterAndSort()
-    RenderRows()
+    FullRescanAndRender()
   end)
   return btn
 end
@@ -629,9 +735,22 @@ local function CreateScannerWindow()
   btnAll:SetPoint("LEFT", btnReady, "RIGHT", 6, 0)
   win.filterButtons["all"] = btnAll
 
+  local btnUnlearned = CreateFilterButton(filterBar, "Not Learned", "unlearned", 92)
+  btnUnlearned:SetPoint("LEFT", btnAll, "RIGHT", 6, 0)
+  btnUnlearned:HookScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+    GameTooltip:SetText("Recipes you have not learned", 0.4, 0.85, 0.94)
+    GameTooltip:AddLine("Profit per craft (all mats bought), the price of the recipe item on the AH or at a vendor, and how many crafts pay it back. Click 'Scan AH' at the Auction House to fetch prices.", 1, 1, 1, true)
+    GameTooltip:Show()
+  end)
+  btnUnlearned:HookScript("OnLeave", function()
+    GameTooltip:Hide()
+  end)
+  win.filterButtons["unlearned"] = btnUnlearned
+
   local trueProfitCheck = CreateFrame("CheckButton", nil, filterBar, "UICheckButtonTemplate")
   trueProfitCheck:SetSize(22, 22)
-  trueProfitCheck:SetPoint("LEFT", btnAll, "RIGHT", 16, 0)
+  trueProfitCheck:SetPoint("LEFT", btnUnlearned, "RIGHT", 12, 0)
   trueProfitCheck:SetScript("OnClick", function(self)
     local db = ns.GetDB()
     db.onlyTrueProfit = self:GetChecked() and true or false
@@ -643,7 +762,7 @@ local function CreateScannerWindow()
 
   local checkLabel = filterBar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   checkLabel:SetPoint("LEFT", trueProfitCheck, "RIGHT", 2, 0)
-  checkLabel:SetText("True Profit > 0 only")
+  checkLabel:SetText("Profit > 0 only")
 
   -- Column headers
   local colHeader = CreateFrame("Frame", nil, win, "BackdropTemplate")
@@ -653,10 +772,10 @@ local function CreateScannerWindow()
   SetFlatBackdrop(colHeader, { 0.11, 0.13, 0.17, 1 }, { 0.22, 0.26, 0.32, 1 })
 
   local columns = {
-    { key = "name", label = "Recipe", x = 8, width = 266, justify = "LEFT" },
-    { key = "missingCost", label = "Missing Mats", x = 278, width = 108, justify = "RIGHT" },
-    { key = "cashProfit", label = "Cash Profit", x = 392, width = 112, justify = "RIGHT" },
-    { key = "trueProfit", label = "True Profit", x = 510, width = 108, justify = "RIGHT" },
+    { key = "name", label = "Recipe", ukey = "name", ulabel = "Recipe", x = 8, width = 266, justify = "LEFT" },
+    { key = "missingCost", label = "Missing Mats", ukey = "recipeCost", ulabel = "Recipe Cost", x = 278, width = 108, justify = "RIGHT" },
+    { key = "cashProfit", label = "Cash Profit", ukey = "trueProfit", ulabel = "Profit/Craft", x = 392, width = 112, justify = "RIGHT" },
+    { key = "trueProfit", label = "True Profit", ukey = "payback", ulabel = "Payback", x = 510, width = 108, justify = "RIGHT" },
   }
 
   win.headerButtons = {}
@@ -665,7 +784,7 @@ local function CreateScannerWindow()
     hb:SetPoint("LEFT", colHeader, "LEFT", col.x, 0)
     hb:SetSize(col.width, 22)
     hb.sortKey = col.key
-    hb.baseLabel = col.label
+    hb.def = col
 
     local t = hb:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     t:SetAllPoints(hb)
@@ -674,11 +793,12 @@ local function CreateScannerWindow()
 
     hb:SetScript("OnClick", function()
       local db = ns.GetDB()
-      if db.sortKey == col.key then
+      local key = hb.sortKey
+      if db.sortKey == key then
         db.sortDesc = not db.sortDesc
       else
-        db.sortKey = col.key
-        db.sortDesc = (col.key ~= "name" and col.key ~= "missingCost")
+        db.sortKey = key
+        db.sortDesc = not (key == "name" or key == "missingCost" or key == "recipeCost" or key == "payback")
       end
       scrollOffset = 0
       ApplyFilterAndSort()
@@ -838,3 +958,50 @@ function ns.ToggleScannerWindow()
   FullRescanAndRender()
   win:Show()
 end
+
+-- Learn recipe item IDs from any AH browse result (our Scan AH or a manual search):
+-- the recipe API does not say which item teaches a recipe, so we match by item name.
+local mapRefreshPending = false
+local function MapRecipeItem(itemID)
+  local recipeID = recipeItemNameToID[C_Item.GetItemNameByID(itemID) or ""]
+  local db = ns.GetDB()
+  if not recipeID or db.recipeItems[recipeID] == itemID then
+    return
+  end
+  db.recipeItems[recipeID] = itemID
+  if not mapRefreshPending then
+    mapRefreshPending = true
+    C_Timer.After(0.5, function()
+      mapRefreshPending = false
+      ns.RefreshAll()
+    end)
+  end
+end
+
+local function CaptureRecipeItems(results)
+  if type(results) ~= "table" or next(recipeItemNameToID) == nil then
+    return
+  end
+  for _, result in ipairs(results) do
+    local itemID = result.itemKey and result.itemKey.itemID
+    if itemID and C_Item.GetItemNameByID(itemID) then
+      MapRecipeItem(itemID)
+    elseif itemID then
+      -- Name not cached yet: map it once the client has loaded the item
+      Item:CreateFromItemID(itemID):ContinueOnItemLoad(function()
+        MapRecipeItem(itemID)
+      end)
+    end
+  end
+end
+
+local ahEventFrame = CreateFrame("Frame")
+ahEventFrame:RegisterEvent("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED")
+ahEventFrame:RegisterEvent("AUCTION_HOUSE_BROWSE_RESULTS_ADDED")
+ahEventFrame:SetScript("OnEvent", function(_, event, added)
+  if event == "AUCTION_HOUSE_BROWSE_RESULTS_ADDED" then
+    CaptureRecipeItems(added)
+  elseif C_AuctionHouse and C_AuctionHouse.GetBrowseResults then
+    CaptureRecipeItems(C_AuctionHouse.GetBrowseResults())
+  end
+end)
