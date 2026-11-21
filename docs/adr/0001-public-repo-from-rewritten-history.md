@@ -19,4 +19,6 @@ is the one chosen for public use. The code tree is byte-identical to the archive
 ## Consequences
 
 - Pull request numbers and review discussions before v1.2.0 exist only in the private archive.
-- Old local clones point at the archive and must not be pushed to the new repository.
+- Clones made before the switch still use the `AuctionatorOwnedMats` URL, which now resolves to the
+  public repository, while their objects hold the old commits. Do not push from them: re-clone the
+  public repository, or point `origin` at `AuctionatorOwnedMats-archive`.
