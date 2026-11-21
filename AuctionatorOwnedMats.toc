@@ -5,6 +5,7 @@
 ## Version: @project-version@
 ## Dependencies: Auctionator
 ## SavedVariables: AuctionatorOwnedMatsDB
+## X-Curse-Project-ID: 1821517
 
 Core.lua
 Scanner.lua

@@ -1,35 +1,37 @@
 # Auctionator: Owned Mats
 
-**Auctionator: Owned Mats** is a companion addon for [Auctionator](https://www.curseforge.com/wow/addons/auctionator) on **WoW: Forever**. Auctionator tells you what a craft costs if you buy every reagent. This addon also counts the materials already in your bags. It shows what you still need to buy, the real profit of each craft, and which recipes make the most money from the materials you already own.
+A companion addon for [Auctionator](https://www.curseforge.com/wow/addons/auctionator) on **WoW: Forever**.
 
-**Requires:** Auctionator.
+Auctionator normally calculates crafting costs as if you have to buy every reagent from scratch. **Auctionator: Owned Mats** also counts what is already in your bags, so you can see how much you still need to spend, what the real profit of a craft is, and which recipes make the most gold from the materials you already own.
+
+**Requires: Auctionator**
 
 ## Features
 
 ### Bag-aware cost and profit in the Professions window
 
-Two extra lines appear below Auctionator's *To Craft* and *Profit* lines:
+Right below Auctionator's *To Craft* and *Profit* lines, the addon adds two more lines:
 
-- **Price of missing mats**: the cost of only the reagents you do not already have in your bags. It turns green when everything is in your bags and amber when something is still missing.
-- **Cash Profit**: profit after the 5% Auction House cut, counting only the gold you still have to spend. It is green when positive and red when negative.
+- **Price of missing mats**: the cost of only the reagents you do not already have in your bags. It turns green when you have everything on hand, and amber when you are still missing something.
+- **Cash Profit**: your profit after the 5% Auction House cut, counting only the gold you still have to spend. Green when positive, red when negative.
 
 ### Best Crafts window
 
-Open it with the **Best Crafts** button in the Professions window, or type `/aom list`.
+Click the **Best Crafts** button in the Professions window, or type `/aom list`, to get an overview of your current profession:
 
-- Scans every learned recipe of the open profession against your bags and Auctionator prices.
-- Filters: **Have Mats**, **Ready Only**, **All Recipes** and **True Profit > 0 only**.
-- Sortable columns: Recipe, Missing Mats, Cash Profit and True Profit.
-- Tooltips show the reagent breakdown and the age of each Auction House price.
-- Click a row to open that recipe in the Professions window.
-- **Scan AH** (while the Auction House is open) runs a live Auctionator search for the listed recipes and reagents and updates profits as the results arrive.
+- Checks all of your learned recipes for the open profession against your bags and Auctionator prices.
+- Filter the list with **Have Mats**, **Ready Only**, **All Recipes**, and **True Profit > 0 only**.
+- Sort by **Recipe**, **Missing Mats**, **Cash Profit**, or **True Profit**.
+- Tooltips show the reagent breakdown and how old each Auction House price is.
+- Click a row to jump straight to that recipe in the Professions window.
+- While the Auction House is open, click **Scan AH** to run a live Auctionator search for the listed recipes and reagents, updating profits as results come in.
 
 ### Not Learned tab
 
-Shows the recipes of the open profession that you have not learned yet, so you can decide whether a recipe is worth buying:
+Before buying a new recipe, check the **Not Learned** tab to see what you have not learned yet for the open profession and decide whether it is worth picking up:
 
 - **Recipe Cost**: the Auction House or vendor price of the recipe item.
-- **Profit/Craft**: the profit of one craft when you buy all materials.
+- **Profit/Craft**: the profit from one craft if you buy all the materials.
 - **Payback**: how many crafts it takes to earn back the price of the recipe.
 
 ## Slash commands
@@ -40,9 +42,9 @@ Shows the recipes of the open profession that you have not learned yet, so you c
 
 ## Notes
 
-- Prices come from Auctionator. Scan the Auction House with Auctionator (or use **Scan AH**) to keep them fresh.
+- Prices come from Auctionator, so scan the Auction House with Auctionator (or use **Scan AH**) to keep them up to date.
 - Recipe items are matched by their English names, so the Not Learned tab works best on English clients.
 
 ## Feedback
 
-Report bugs and request features on [GitHub Issues](https://github.com/machillef/AuctionatorOwnedMats/issues).
+If you run into a bug or have a feature request, let me know on [GitHub Issues](https://github.com/machillef/AuctionatorOwnedMats/issues).
