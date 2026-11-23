@@ -655,7 +655,7 @@ local function CreateScannerWindow()
     return scannerFrame
   end
 
-  local win = CreateFrame("Frame", "AuctionatorOwnedMatsListFrame", UIParent, "BackdropTemplate")
+  local win = CreateFrame("Frame", "OwnedMatsListFrame", UIParent, "BackdropTemplate")
   win:SetSize(WINDOW_WIDTH, WINDOW_HEIGHT)
   win:SetFrameStrata("HIGH")
   win:SetClampedToScreen(true)
@@ -672,7 +672,7 @@ local function CreateScannerWindow()
   end)
   SetFlatBackdrop(win, { 0.055, 0.065, 0.085, 0.97 }, { 0.25, 0.30, 0.36, 1 })
 
-  table.insert(UISpecialFrames, "AuctionatorOwnedMatsListFrame")
+  table.insert(UISpecialFrames, "OwnedMatsListFrame")
 
   -- Title bar
   local header = CreateFrame("Frame", nil, win, "BackdropTemplate")
@@ -940,7 +940,7 @@ end
 
 function ns.ToggleScannerWindow()
   if not (ProfessionsFrame and ProfessionsFrame:IsShown()) then
-    print("|cff66d9efAuctionatorOwnedMats:|r Open a profession window first to scan its recipes.")
+    print("|cff66d9efOwnedMats:|r Open a profession window first to scan its recipes.")
     return
   end
 

@@ -1,10 +1,10 @@
 ## Interface: 16001
-## Title: Auctionator: Owned Mats
+## Title: Owned Mats
 ## Notes: Shows missing reagent cost, cash profit, and a sortable Best Crafts scanner using materials in your bags and Auctionator prices.
 ## Author: machillef
 ## Version: @project-version@
 ## Dependencies: Auctionator
-## SavedVariables: AuctionatorOwnedMatsDB
+## SavedVariables: OwnedMatsDB
 ## X-Curse-Project-ID: 1821517
 
 Core.lua

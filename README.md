@@ -1,4 +1,4 @@
-# AuctionatorOwnedMats
+# OwnedMats
 
 A lightweight companion addon for **Auctionator** on **WoW: Forever (`1.60.1` / Interface `16001`)**.
 
@@ -19,10 +19,10 @@ A lightweight companion addon for **Auctionator** on **WoW: Forever (`1.60.1` / 
 
 Requires **Auctionator**.
 
-- **CurseForge app:** search for *Auctionator: Owned Mats* (WoW: Forever). Auctionator is installed with it.
-- **Manual:** download the zip from [GitHub Releases](https://github.com/machillef/AuctionatorOwnedMats/releases) and extract it into `World of Warcraft\_forever_\Interface\AddOns\`, so you get `AddOns\AuctionatorOwnedMats\AuctionatorOwnedMats.toc`.
+- **CurseForge app:** search for *Owned Mats* (WoW: Forever). Auctionator is installed with it.
+- **Manual:** download the zip from [GitHub Releases](https://github.com/machillef/OwnedMats/releases) and extract it into `World of Warcraft\_forever_\Interface\AddOns\`, so you get `AddOns\OwnedMats\OwnedMats.toc`.
 
-Launch (or restart) WoW and enable **Auctionator: Owned Mats** in the AddOns list.
+Launch (or restart) WoW and enable **Owned Mats** in the AddOns list.
 
 ## Releasing
 

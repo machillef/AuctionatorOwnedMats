@@ -1,5 +1,5 @@
 local ADDON_NAME, ns = ...
-local CALLER_ID = "AuctionatorOwnedMats"
+local CALLER_ID = "OwnedMats"
 
 ns.CALLER_ID = CALLER_ID
 ns.LABEL_COLOR = "|cff66d9ef"
@@ -12,28 +12,28 @@ local bestCraftsButton = nil
 local hookedAucFrame = false
 
 function ns.GetDB()
-  if type(AuctionatorOwnedMatsDB) ~= "table" then
-    AuctionatorOwnedMatsDB = {}
+  if type(OwnedMatsDB) ~= "table" then
+    OwnedMatsDB = {}
   end
-  if AuctionatorOwnedMatsDB.enabled == nil then
-    AuctionatorOwnedMatsDB.enabled = true
+  if OwnedMatsDB.enabled == nil then
+    OwnedMatsDB.enabled = true
   end
-  if AuctionatorOwnedMatsDB.filterMode == nil then
-    AuctionatorOwnedMatsDB.filterMode = "have" -- "have", "ready", "all", "unlearned"
+  if OwnedMatsDB.filterMode == nil then
+    OwnedMatsDB.filterMode = "have" -- "have", "ready", "all", "unlearned"
   end
-  if type(AuctionatorOwnedMatsDB.recipeItems) ~= "table" then
-    AuctionatorOwnedMatsDB.recipeItems = {} -- recipeID -> itemID of the item that teaches it
+  if type(OwnedMatsDB.recipeItems) ~= "table" then
+    OwnedMatsDB.recipeItems = {} -- recipeID -> itemID of the item that teaches it
   end
-  if AuctionatorOwnedMatsDB.onlyTrueProfit == nil then
-    AuctionatorOwnedMatsDB.onlyTrueProfit = false
+  if OwnedMatsDB.onlyTrueProfit == nil then
+    OwnedMatsDB.onlyTrueProfit = false
   end
-  if AuctionatorOwnedMatsDB.sortKey == nil then
-    AuctionatorOwnedMatsDB.sortKey = "cashProfit"
+  if OwnedMatsDB.sortKey == nil then
+    OwnedMatsDB.sortKey = "cashProfit"
   end
-  if AuctionatorOwnedMatsDB.sortDesc == nil then
-    AuctionatorOwnedMatsDB.sortDesc = true
+  if OwnedMatsDB.sortDesc == nil then
+    OwnedMatsDB.sortDesc = true
   end
-  return AuctionatorOwnedMatsDB
+  return OwnedMatsDB
 end
 
 function ns.GetBagCount(itemID)
@@ -519,7 +519,7 @@ local function InitializeProfessionsUI()
 
   local schematicForm = ProfessionsFrame.CraftingPage.SchematicForm
 
-  displayFrame = CreateFrame("Frame", "AuctionatorOwnedMatsProfessionsFrame", schematicForm)
+  displayFrame = CreateFrame("Frame", "OwnedMatsProfessionsFrame", schematicForm)
   displayFrame:SetSize(320, 32)
   displayFrame:SetFrameLevel(520)
 
@@ -530,7 +530,7 @@ local function InitializeProfessionsUI()
   displayFrame.Text = text
 
   -- "Best Crafts" button in the top-right header bar of ProfessionsFrame
-  bestCraftsButton = CreateFrame("Button", "AuctionatorOwnedMatsBestCraftsButton", ProfessionsFrame, "UIPanelButtonTemplate")
+  bestCraftsButton = CreateFrame("Button", "OwnedMatsBestCraftsButton", ProfessionsFrame, "UIPanelButtonTemplate")
   bestCraftsButton:SetSize(96, 20)
   bestCraftsButton:SetText("Best Crafts")
   bestCraftsButton:SetPoint("TOPRIGHT", ProfessionsFrame, "TOPRIGHT", -32, -3)
@@ -543,7 +543,7 @@ local function InitializeProfessionsUI()
   end)
   bestCraftsButton:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
-    GameTooltip:SetText("Auctionator: Owned Mats", 0.4, 0.85, 0.94)
+    GameTooltip:SetText("Owned Mats", 0.4, 0.85, 0.94)
     GameTooltip:AddLine("Scan all learned recipes in this profession and sort by Cash Profit using materials in your bags.", 1, 1, 1, true)
     GameTooltip:Show()
   end)
@@ -623,9 +623,9 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
   end
 end)
 
-SLASH_AUCTIONATOROWNEDMATS1 = "/aom"
-SLASH_AUCTIONATOROWNEDMATS2 = "/ownedmats"
-SlashCmdList["AUCTIONATOROWNEDMATS"] = function(msg)
+SLASH_OWNEDMATS1 = "/aom"
+SLASH_OWNEDMATS2 = "/ownedmats"
+SlashCmdList["OWNEDMATS"] = function(msg)
   local cmd = (msg or ""):lower():match("^%s*(.-)%s*$")
   local db = ns.GetDB()
 
@@ -644,27 +644,27 @@ SlashCmdList["AUCTIONATOROWNEDMATS"] = function(msg)
     else
       db.enabled = not db.enabled
     end
-    print("|cff66d9efAuctionatorOwnedMats:|r " .. (db.enabled and "Enabled" or "Disabled"))
+    print("|cff66d9efOwnedMats:|r " .. (db.enabled and "Enabled" or "Disabled"))
     ns.UpdateDisplay()
     return
   end
 
   if cmd == "debug" then
     if not (ProfessionsFrame and ProfessionsFrame.CraftingPage and ProfessionsFrame.CraftingPage.SchematicForm) then
-      print("|cff66d9efAuctionatorOwnedMats:|r Open a profession window first.")
+      print("|cff66d9efOwnedMats:|r Open a profession window first.")
       return
     end
     local schematicForm = ProfessionsFrame.CraftingPage.SchematicForm
     local recipeInfo = schematicForm:GetRecipeInfo()
     if not recipeInfo then
-      print("|cff66d9efAuctionatorOwnedMats:|r Select a recipe first.")
+      print("|cff66d9efOwnedMats:|r Select a recipe first.")
       return
     end
     local recipeLevel = schematicForm.GetCurrentRecipeLevel and schematicForm:GetCurrentRecipeLevel() or nil
     local recipeSchematic = C_TradeSkillUI.GetRecipeSchematic(recipeInfo.recipeID, false, recipeLevel)
     local transaction = schematicForm.GetTransaction and schematicForm:GetTransaction() or nil
     local missingCost, fullCost, breakdown = ns.CalculateCosts(recipeSchematic, transaction)
-    print(string.format("|cff66d9efAuctionatorOwnedMats:|r %s (Full: %s, Missing: %s)", recipeInfo.name or "?", ns.FormatMoney(fullCost), ns.FormatMoney(missingCost)))
+    print(string.format("|cff66d9efOwnedMats:|r %s (Full: %s, Missing: %s)", recipeInfo.name or "?", ns.FormatMoney(fullCost), ns.FormatMoney(missingCost)))
     for _, entry in ipairs(breakdown) do
       local itemName = (C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(entry.itemID)) or tostring(entry.itemID)
       print(string.format("  - %s: need %d, in bags %d, missing %d @ %s", itemName, entry.needed, entry.usedFromBags, entry.missing, ns.FormatMoney(entry.unitPrice)))
@@ -672,5 +672,5 @@ SlashCmdList["AUCTIONATOROWNEDMATS"] = function(msg)
     return
   end
 
-  print("|cff66d9efAuctionatorOwnedMats:|r Commands: /aom list | /aom toggle | /aom on | /aom off | /aom debug")
+  print("|cff66d9efOwnedMats:|r Commands: /aom list | /aom toggle | /aom on | /aom off | /aom debug")
 end

@@ -1,8 +1,8 @@
-# Auctionator: Owned Mats
+# Owned Mats
 
 A companion addon for [Auctionator](https://www.curseforge.com/wow/addons/auctionator) on **WoW: Forever**.
 
-Auctionator normally calculates crafting costs as if you have to buy every reagent from scratch. **Auctionator: Owned Mats** also counts what is already in your bags, so you can see how much you still need to spend, what the real profit of a craft is, and which recipes make the most gold from the materials you already own.
+Auctionator normally calculates crafting costs as if you have to buy every reagent from scratch. **Owned Mats** also counts what is already in your bags, so you can see how much you still need to spend, what the real profit of a craft is, and which recipes make the most gold from the materials you already own.
 
 **Requires: Auctionator**
 
@@ -47,4 +47,4 @@ Before buying a new recipe, check the **Not Learned** tab to see what you have n
 
 ## Feedback
 
-If you run into a bug or have a feature request, let me know on [GitHub Issues](https://github.com/machillef/AuctionatorOwnedMats/issues).
+If you run into a bug or have a feature request, let me know on [GitHub Issues](https://github.com/machillef/OwnedMats/issues).
