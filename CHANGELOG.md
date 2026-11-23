@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.1] - 2026-11-23
+
+### Changed
+- Renamed to **Owned Mats** (addon folder `OwnedMats`), since CurseForge does not allow "Auctionator" in another project's name. Settings saved under the old name are not carried over.
+
 ## [1.2.0] - 2026-11-21
 
 First public release.

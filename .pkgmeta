@@ -1,4 +1,4 @@
-package-as: AuctionatorOwnedMats
+package-as: OwnedMats
 
 manual-changelog:
   filename: CHANGELOG.md
